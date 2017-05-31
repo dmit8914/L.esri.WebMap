@@ -46,38 +46,42 @@ export var FeatureCollection = L.GeoJSON.extend({
 
   _parseFeatureCollection: function (data) {
     var i, len;
-    var index = 0;
+    //var index = 0;
+
     for (i = 0, len = data.layers.length; i < len; i++) {
-      if (data.layers[i].featureSet.features.length > 0) {
-        index = i;
+      if (!data.layers[i].featureSet.features.length) {
+          continue;
       }
-    }
-    var features = data.layers[index].featureSet.features;
-    var geometryType = data.layers[index].layerDefinition.geometryType; // 'esriGeometryPoint' | 'esriGeometryMultipoint' | 'esriGeometryPolyline' | 'esriGeometryPolygon' | 'esriGeometryEnvelope'
-    var objectIdField = data.layers[index].layerDefinition.objectIdField;
-    var layerDefinition = data.layers[index].layerDefinition || null;
 
-    if (data.layers[index].layerDefinition.extent.spatialReference.wkid !== 4326) {
-      if (data.layers[index].layerDefinition.extent.spatialReference.wkid !== 102100) {
-        console.error('[L.esri.WebMap] this wkid (' + data.layers[index].layerDefinition.extent.spatialReference.wkid + ') is not supported.');
+      var layer = data.layers[i];
+      var layerDefinition = layer.layerDefinition || null;
+
+      var features = layer.featureSet.features;
+      var geometryType = layerDefinition.geometryType; // 'esriGeometryPoint' | 'esriGeometryMultipoint' | 'esriGeometryPolyline' | 'esriGeometryPolygon' | 'esriGeometryEnvelope'
+      var objectIdField = layerDefinition.objectIdField;
+
+      if (layerDefinition.extent.spatialReference.wkid !== 4326) {
+          if (layerDefinition.extent.spatialReference.wkid !== 102100) {
+              console.error('[L.esri.WebMap] this wkid (' + layerDefinition.extent.spatialReference.wkid + ') is not supported.');
+          }
+          features = this._projTo4326(features, geometryType);
       }
-      features = this._projTo4326(features, geometryType);
-    }
-    if (data.layers[index].popupInfo !== undefined) {
-      this.popupInfo = data.layers[index].popupInfo;
-    }
-    if (data.layers[index].layerDefinition.drawingInfo.labelingInfo !== undefined) {
-      this.labelingInfo = data.layers[index].layerDefinition.drawingInfo.labelingInfo;
-    }
-    console.log(data);
+      if (layer.popupInfo !== undefined) {
+          this.popupInfo = layer.popupInfo;
+      }
+      if (layerDefinition.drawingInfo.labelingInfo !== undefined) {
+          this.labelingInfo = layerDefinition.drawingInfo.labelingInfo;
+      }
+      console.log(data);
 
-    var geojson = this._featureCollectionToGeoJSON(features, objectIdField);
+      var geojson = this._featureCollectionToGeoJSON(features, objectIdField);
 
-    if (layerDefinition !== null) {
-      setRenderer(layerDefinition, this);
+      // if (layerDefinition !== null) {
+      //     setRenderer(layerDefinition, this);
+      // }
+      console.log(geojson);
+      this.addData(geojson);
     }
-    console.log(geojson);
-    this.addData(geojson);
   },
 
   _projTo4326: function (features, geometryType) {
