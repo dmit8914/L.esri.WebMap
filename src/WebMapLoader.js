@@ -37,6 +37,11 @@ export var WebMap = L.Evented.extend({
     this._loadedLayersNum = 0;
     this._layersNum = 0;
 
+    this._service = L.esri.service({
+      token: this.options.token,
+      url: 'https://' + this._server + '/sharing/rest/content/items/'
+    });
+
     this.layers = []; // Check the layer types here -> https://github.com/ynunokawa/L.esri.WebMap/wiki/Layer-types
     this.title = ''; // Web Map Title
     this.bookmarks = []; // Web Map Bookmarks -> [{ name: 'Bookmark name', bounds: <L.latLngBounds> }]
@@ -57,22 +62,17 @@ export var WebMap = L.Evented.extend({
   },
 
   _operationalLayer: function (layer, layers, map, params, paneName) {
-    var lyr = operationalLayer(layer, layers, map, params);
+    var lyr = operationalLayer(layer, layers, map, params, paneName);
     if (lyr !== undefined && layer.visibility === true) {
       lyr.addTo(map);
     }
   },
 
   _loadWebMapMetaData: function (id) {
-    var params = {};
     var map = this._map;
     var webmap = this;
-    var webmapMetaDataRequestUrl = 'https://' + this._server + '/sharing/rest/content/items/' + id;
-    if (this._token && this._token.length > 0) {
-      params.token = this._token;
-    }
 
-    L.esri.request(webmapMetaDataRequestUrl, params, function (error, response) {
+    this._service.request(id, {}, function(error, response) {
       if (error) {
         console.log(error);
       } else {
@@ -91,12 +91,12 @@ export var WebMap = L.Evented.extend({
     var layers = this.layers;
     var server = this._server;
     var params = {};
-    var webmapRequestUrl = 'https://' + server + '/sharing/rest/content/items/' + id + '/data';
+    var webmapRequestUrl = id + '/data';
     if (this._token && this._token.length > 0) {
       params.token = this._token;
     }
 
-    L.esri.request(webmapRequestUrl, params, function (error, response) {
+    this._service.request(webmapRequestUrl, {}, function (error, response) {
       if (error) {
         console.log(error);
       } else {
@@ -106,8 +106,7 @@ export var WebMap = L.Evented.extend({
         // Add Basemap
         response.baseMap.baseMapLayers.map(function (baseMapLayer) {
           if (baseMapLayer.itemId !== undefined) {
-            var itemRequestUrl = 'https://' + server + '/sharing/rest/content/items/' + baseMapLayer.itemId;
-            L.esri.request(itemRequestUrl, params, function (err, res) {
+            this._service.request(baseMapLayer.itemId, {}, function (err, res) {
               if (err) {
                 console.error(error);
               } else {
@@ -130,25 +129,24 @@ export var WebMap = L.Evented.extend({
         response.operationalLayers.map(function (layer, i) {
           var paneName = 'esri-webmap-layer' + i;
           map.createPane(paneName);
-          if (layer.itemId !== undefined) {
-            var itemRequestUrl = 'https://' + server + '/sharing/rest/content/items/' + layer.itemId;
-            L.esri.request(itemRequestUrl, params, function (err, res) {
-              if (err) {
-                console.error(error);
-              } else {
-                console.log(res.access);
-                if (res.access !== 'public') {
-                  this._operationalLayer(layer, layers, map, params, paneName);
-                } else {
-                  this._operationalLayer(layer, layers, map, {}, paneName);
-                }
-              }
-              this._checkLoaded();
-            }, this);
-          } else {
-            this._operationalLayer(layer, layers, map, {}, paneName);
+          // if (layer.itemId !== undefined) {
+          //   this._service.request(layer.itemId, {}, function (err, res) {
+          //     if (err) {
+          //       console.error(error);
+          //     } else {
+          //       console.log(res.access);
+          //       if (res.access !== 'public') {
+          //         this._operationalLayer(layer, layers, map, params, paneName);
+          //       } else {
+          //         this._operationalLayer(layer, layers, map, {}, paneName);
+          //       }
+          //     }
+          //     this._checkLoaded();
+          //   }, this);
+          // } else {
+            this._operationalLayer(layer, layers, map, params, paneName);
             this._checkLoaded();
-          }
+          //}
         }.bind(this));
 
         // Add Bookmarks
