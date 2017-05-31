@@ -3,7 +3,7 @@ import L from 'leaflet';
 import { arcgisToGeoJSON } from 'arcgis-to-geojson-utils';
 import { setRenderer } from './Renderer';
 
-export var FeatureCollection = L.GeoJSON.extend({
+export var FeatureCollection = L.LayerGroup.extend({
   options: {
     data: {}, // Esri Feature Collection JSON or Item ID
     opacity: 1
@@ -76,11 +76,15 @@ export var FeatureCollection = L.GeoJSON.extend({
 
       var geojson = this._featureCollectionToGeoJSON(features, objectIdField);
 
+      var geojsonLayer =  L.geoJSON(geojson);
+
+      this.addLayer(geojsonLayer);
+
       // if (layerDefinition !== null) {
       //     setRenderer(layerDefinition, this);
       // }
       console.log(geojson);
-      this.addData(geojson);
+      //this.addData(geojson);
     }
   },
 
