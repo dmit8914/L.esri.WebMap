@@ -76,15 +76,16 @@ export var FeatureCollection = L.LayerGroup.extend({
 
       var geojson = this._featureCollectionToGeoJSON(features, objectIdField);
 
-      var geojsonLayer =  L.geoJSON(geojson);
+      var geojsonLayer = L.geoJSON([]);
 
-      this.addLayer(geojsonLayer);
+      if (layerDefinition !== null) {
+          setRenderer(layerDefinition, geojsonLayer);
+      }
 
-      // if (layerDefinition !== null) {
-      //     setRenderer(layerDefinition, this);
-      // }
+      geojsonLayer.addData(geojson);
+
       console.log(geojson);
-      //this.addData(geojson);
+      this.addLayer(geojsonLayer);
     }
   },
 
