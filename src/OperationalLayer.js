@@ -44,45 +44,45 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
       data: layer.itemId || layer.featureCollection,
       opacity: layer.opacity,
       pane: paneName,
-      onEachFeature: function (geojson, l) {
-        if (fc !== undefined) {
-          popupInfo = fc.popupInfo;
-          labelingInfo = fc.labelingInfo;
-        }
-        if (popupInfo !== undefined && popupInfo !== null) {
-          var popupContent = createPopupContent(popupInfo, geojson.properties);
-          l.bindPopup(popupContent);
-        }
-        if (labelingInfo !== undefined && labelingInfo !== null) {
-          var coordinates = l.feature.geometry.coordinates;
-          var labelPos;
-
-          if (l.feature.geometry.type === 'Point') {
-            labelPos = pointLabelPos(coordinates);
-          } else if (l.feature.geometry.type === 'LineString') {
-            labelPos = polylineLabelPos(coordinates);
-          } else if (l.feature.geometry.type === 'MultiLineString') {
-            labelPos = polylineLabelPos(coordinates[Math.round(coordinates.length / 2)]);
-          } else {
-            labelPos = polygonLabelPos(l);
-          }
-
-          var label = labelMarker(labelPos.position, {
-            zIndexOffset: 1,
-            properties: geojson.properties,
-            labelingInfo: labelingInfo,
-            offset: labelPos.offset,
-            pane: labelPaneName
-          });
-
-          labelsLayer.addLayer(label);
-        }
-      }
+      // onEachFeature: function (geojson, l) {
+      //   if (fc !== undefined) {
+      //     popupInfo = fc.popupInfo;
+      //     labelingInfo = fc.labelingInfo;
+      //   }
+      //   if (popupInfo !== undefined && popupInfo !== null) {
+      //     var popupContent = createPopupContent(popupInfo, geojson.properties);
+      //     l.bindPopup(popupContent);
+      //   }
+      //   if (labelingInfo !== undefined && labelingInfo !== null) {
+      //     var coordinates = l.feature.geometry.coordinates;
+      //     var labelPos;
+      //
+      //     if (l.feature.geometry.type === 'Point') {
+      //       labelPos = pointLabelPos(coordinates);
+      //     } else if (l.feature.geometry.type === 'LineString') {
+      //       labelPos = polylineLabelPos(coordinates);
+      //     } else if (l.feature.geometry.type === 'MultiLineString') {
+      //       labelPos = polylineLabelPos(coordinates[Math.round(coordinates.length / 2)]);
+      //     } else {
+      //       labelPos = polygonLabelPos(l);
+      //     }
+      //
+      //     var label = labelMarker(labelPos.position, {
+      //       zIndexOffset: 1,
+      //       properties: geojson.properties,
+      //       labelingInfo: labelingInfo,
+      //       offset: labelPos.offset,
+      //       pane: labelPaneName
+      //     });
+      //
+      //     labelsLayer.addLayer(label);
+      //   }
+      // }
     });
 
-    lyr = L.layerGroup([fc, labelsLayer]);
+    lyr = fc;//L.layerGroup([fc, labelsLayer]);
 
-    layers.push({ type: 'FC', title: layer.title || '', layer: lyr });
+    layers.push({ type: 'FC', title: layer.title || '', layer: fc });
 
     return lyr;
   } else if (layer.layerType === 'ArcGISFeatureLayer' && layer.layerDefinition !== undefined) {

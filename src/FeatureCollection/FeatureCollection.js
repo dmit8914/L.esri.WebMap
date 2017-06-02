@@ -3,6 +3,12 @@ import L from 'leaflet';
 import { arcgisToGeoJSON } from 'arcgis-to-geojson-utils';
 import { setRenderer } from './Renderer';
 
+import { labelMarker } from '../Label/LabelMarker';
+import { pointLabelPos } from '../Label/PointLabel';
+import { polylineLabelPos } from '../Label/PolylineLabel';
+import { polygonLabelPos } from '../Label/PolygonLabel';
+import { createPopupContent } from '../Popup/Popup';
+
 export var FeatureCollection = L.LayerGroup.extend({
   options: {
     data: {}, // Esri Feature Collection JSON or Item ID
@@ -46,7 +52,7 @@ export var FeatureCollection = L.LayerGroup.extend({
 
   _parseFeatureCollection: function (data) {
     var i, len;
-    //var index = 0;
+    var labelsLayer = L.featureGroup();
 
     for (i = 0, len = data.layers.length; i < len; i++) {
       if (!data.layers[i].featureSet.features.length) {
@@ -66,17 +72,56 @@ export var FeatureCollection = L.LayerGroup.extend({
           }
           features = this._projTo4326(features, geometryType);
       }
-      if (layer.popupInfo !== undefined) {
-          this.popupInfo = layer.popupInfo;
-      }
-      if (layerDefinition.drawingInfo.labelingInfo !== undefined) {
-          this.labelingInfo = layerDefinition.drawingInfo.labelingInfo;
-      }
+      // if (layer.popupInfo !== undefined) {
+      //     this.popupInfo = layer.popupInfo;
+      // }
+      // if (layerDefinition.drawingInfo.labelingInfo !== undefined) {
+      //     this.labelingInfo = layerDefinition.drawingInfo.labelingInfo;
+      // }
       console.log(data);
 
       var geojson = this._featureCollectionToGeoJSON(features, objectIdField);
 
-      var geojsonLayer = L.geoJSON([]);
+      var geojsonLayer = L.geoJSON([], {
+        onEachFeature: function (geojson, l) {
+          // if (fc !== undefined) {
+          //   popupInfo = fc.popupInfo;
+          //   labelingInfo = fc.labelingInfo;
+          // }
+
+          var popupInfo = layer.popupInfo;
+          if (popupInfo !== undefined && popupInfo !== null) {
+            var popupContent = createPopupContent(popupInfo, geojson.properties);
+            l.bindPopup(popupContent);
+          }
+
+          var labelingInfo = layerDefinition.drawingInfo.labelingInfo;
+          if (labelingInfo !== undefined && labelingInfo !== null) {
+            var coordinates = l.feature.geometry.coordinates;
+            var labelPos;
+
+            if (l.feature.geometry.type === 'Point') {
+              labelPos = pointLabelPos(coordinates);
+            } else if (l.feature.geometry.type === 'LineString') {
+              labelPos = polylineLabelPos(coordinates);
+            } else if (l.feature.geometry.type === 'MultiLineString') {
+              labelPos = polylineLabelPos(coordinates[Math.round(coordinates.length / 2)]);
+            } else {
+              labelPos = polygonLabelPos(l);
+            }
+
+            var label = labelMarker(labelPos.position, {
+              zIndexOffset: 1,
+              properties: geojson.properties,
+              labelingInfo: labelingInfo,
+              offset: labelPos.offset,
+              pane: labelPaneName
+            });
+
+            labelsLayer.addLayer(label);
+          }
+        }
+      });
 
       if (layerDefinition !== null) {
           setRenderer(layerDefinition, geojsonLayer);
@@ -87,6 +132,8 @@ export var FeatureCollection = L.LayerGroup.extend({
       console.log(geojson);
       this.addLayer(geojsonLayer);
     }
+
+    this.addLayer(labelsLayer);
   },
 
   _projTo4326: function (features, geometryType) {
