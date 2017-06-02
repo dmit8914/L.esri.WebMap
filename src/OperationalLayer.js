@@ -44,6 +44,7 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
       data: layer.itemId || layer.featureCollection,
       opacity: layer.opacity,
       pane: paneName,
+      labelPaneName: labelPaneName
       // onEachFeature: function (geojson, l) {
       //   if (fc !== undefined) {
       //     popupInfo = fc.popupInfo;

@@ -52,6 +52,7 @@ export var FeatureCollection = L.LayerGroup.extend({
 
   _parseFeatureCollection: function (data) {
     var i, len;
+    var self = this;
     var labelsLayer = L.featureGroup();
 
     for (i = 0, len = data.layers.length; i < len; i++) {
@@ -115,7 +116,7 @@ export var FeatureCollection = L.LayerGroup.extend({
               properties: geojson.properties,
               labelingInfo: labelingInfo,
               offset: labelPos.offset,
-              pane: labelPaneName
+              pane: self.options.labelPaneName
             });
 
             labelsLayer.addLayer(label);
