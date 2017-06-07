@@ -22,7 +22,9 @@ export var WebMap = L.Evented.extend({
     // access token for secure contents on ArcGIS Online
     token: null,
     // server domain name (default= 'www.arcgis.com')
-    server: 'www.arcgis.com'
+    server: 'www.arcgis.com',
+    // should we change the extent
+    preserveExtent: false
   },
 
   initialize: function (webmapId, options) {
@@ -81,9 +83,11 @@ export var WebMap = L.Evented.extend({
         webmap.title = response.title;
         webmap._metadataLoaded = true;
         webmap.fire('metadataLoad');
-        map.fitBounds([response.extent[0].reverse(), response.extent[1].reverse()]);
+        if(!this.options.preserveExtent) {
+          map.fitBounds([response.extent[0].reverse(), response.extent[1].reverse()]);
+        }
       }
-    });
+    }, this);
   },
 
   _loadWebMap: function (id) {
