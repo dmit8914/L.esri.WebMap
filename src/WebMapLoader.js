@@ -60,6 +60,9 @@ export var WebMap = L.Evented.extend({
     if (this._loadedLayersNum === this._layersNum) {
       this._loaded = true;
       this.fire('load');
+      if(this._loadedWithErrors === true) {
+        this.fire('load_failed');
+      }
     }
   },
 
@@ -67,6 +70,9 @@ export var WebMap = L.Evented.extend({
     var lyr = operationalLayer(layer, layers, map, params, paneName);
     if (lyr !== undefined && layer.visibility === true) {
       lyr.addTo(map);
+    }
+    else {
+      this._loadedWithErrors = true;
     }
   },
 

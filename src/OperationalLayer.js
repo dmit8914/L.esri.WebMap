@@ -385,7 +385,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
       lyr = L.esri.Vector.basemap(keys[layer.title]);
     } else {
       console.error('Unsupported Vector Tile Layer: ', layer);
-      lyr = L.featureGroup([]);
+      // lyr = L.featureGroup([]);
+      return;
     }
 
     layers.push({ type: 'VTL', title: layer.title || layer.id || '', layer: lyr });
@@ -429,9 +430,10 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
 
     return lyr;
   } else {
-    lyr = L.featureGroup([]);
+    // lyr = L.featureGroup([]);
     console.log('Unsupported Layer: ', layer);
-    return lyr;
+    // return lyr;
+    return;
   }
 }
 
