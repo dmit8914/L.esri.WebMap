@@ -44,6 +44,10 @@ export var WebMap = L.Evented.extend({
       url: 'https://' + this._server + '/sharing/rest/content/items/'
     });
 
+    if (this.options.onAuthenticationRequired) {
+      this._service.on('authenticationrequired', this.options.onAuthenticationRequired);
+    }
+
     this.layers = []; // Check the layer types here -> https://github.com/ynunokawa/L.esri.WebMap/wiki/Layer-types
     this.title = ''; // Web Map Title
     this.bookmarks = []; // Web Map Bookmarks -> [{ name: 'Bookmark name', bounds: <L.latLngBounds> }]
@@ -69,6 +73,11 @@ export var WebMap = L.Evented.extend({
   _operationalLayer: function (layer, layers, map, params, paneName) {
     var lyr = operationalLayer(layer, layers, map, params, paneName);
     if (lyr !== undefined && layer.visibility === true) {
+
+      if (this.options.onAuthenticationRequired) {
+        lyr.on('authenticationrequired', this.options.onAuthenticationRequired);
+      }
+  
       lyr.addTo(map);
     }
     else {
@@ -139,24 +148,24 @@ export var WebMap = L.Evented.extend({
         response.operationalLayers.map(function (layer, i) {
           var paneName = 'esri-webmap-layer' + i;
           map.createPane(paneName);
-          // if (layer.itemId !== undefined) {
-          //   this._service.request(layer.itemId, {}, function (err, res) {
-          //     if (err) {
-          //       console.error(error);
-          //     } else {
-          //       console.log(res.access);
-          //       if (res.access !== 'public') {
-          //         this._operationalLayer(layer, layers, map, params, paneName);
-          //       } else {
-          //         this._operationalLayer(layer, layers, map, {}, paneName);
-          //       }
-          //     }
-          //     this._checkLoaded();
-          //   }, this);
-          // } else {
-            this._operationalLayer(layer, layers, map, params, paneName);
+          if (layer.itemId !== undefined) {
+            this._service.request(layer.itemId, {}, function (err, res) {
+              if (err) {
+                console.error(error);
+              } else {
+                console.log(res.access);
+                if (res.access !== 'public') {
+                  this._operationalLayer(layer, layers, map, params, paneName);
+                } else {
+                  this._operationalLayer(layer, layers, map, {}, paneName);
+                }
+              }
+              this._checkLoaded();
+            }, this);
+          } else {
+            this._operationalLayer(layer, layers, map, {}, paneName);
             this._checkLoaded();
-          //}
+          }
         }.bind(this));
 
         // Add Bookmarks
