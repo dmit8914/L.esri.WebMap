@@ -38,13 +38,13 @@ export var WebMap = L.Evented.extend({
     this._layersNum = 0;
 
     this._service = L.esri.service({
-      token: this.options.token,
       url: 'https://' + this._server + '/sharing/rest/content/items/'
     });
 
-    if (this.options.onAuthenticationRequired) {
-      this._service.on('authenticationrequired', this.options.onAuthenticationRequired);
-    }
+    this._service.on('authenticationrequired', function(e) {
+      console.log('authenticationrequired');
+      this.fire('authenticationrequired', e);
+    }, this);
 
     this.layers = []; // Check the layer types here -> https://github.com/ynunokawa/L.esri.WebMap/wiki/Layer-types
     this.title = ''; // Web Map Title
@@ -69,19 +69,23 @@ export var WebMap = L.Evented.extend({
     var lyr = operationalLayer(layer, layers, map, params);
     if (lyr !== undefined && layer.visibility === true) {
 
-      if (this.options.onAuthenticationRequired) {
-        lyr.on('authenticationrequired', this.options.onAuthenticationRequired);
-      }
-  
+      lyr.on('authenticationrequired', function(e) {
+        this.fire('authenticationrequired', e);
+      }, this);
+
       lyr.addTo(map);
     }
   },
 
   _loadWebMapMetaData: function (id) {
+    var params = {};
     var map = this._map;
     var webmap = this;
+    if (this._token && this._token.length > 0) {
+      params.token = this._token;
+    }
 
-    this._service.request(id, {}, function(error, response) {
+    this._service.request(id, params, function(error, response) {
       if (error) {
         console.log(error);
       } else {
@@ -105,7 +109,7 @@ export var WebMap = L.Evented.extend({
       params.token = this._token;
     }
 
-    this._service.request(webmapRequestUrl, {}, function (error, response) {
+    this._service.request(webmapRequestUrl, params, function (error, response) {
       if (error) {
         console.log(error);
       } else {
