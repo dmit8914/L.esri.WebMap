@@ -166,6 +166,60 @@ export var WebMap = L.Evented.extend({
         //this.fire('load');
       }
     }.bind(this));
+  },
+
+  // request with auth handling
+  _requestQueue: [],
+  _authenticating:  false,
+
+  authenticate: function(token) {
+    this._authenticating = false;
+    this._token = token;
+    this._runQueue();
+    return this;
+  },
+
+  _request: function(url, params, callback, context) {
+    var wrappedCallback = this._createRequestCallback(url, params, callback, context);
+
+    if (this._token) {
+      params.token = this._token;
+    }
+
+    if (this._authenticating) {
+      _requestQueue.push([url, params, callback, context]);
+    }
+    else {
+      return L.esri.request(url, params, wrappedCallback, context);
+    }
+  },
+
+  _createRequestCallback: function(url, params, callback, context) {
+    return L.Util.bind(function(error, response) {
+      if (error && (error.code === 403 || error.code === 499 || error.code === 498)) {
+        this._authenticating = true;
+
+        this._requestQueue.push([url, params, callback, context]);
+
+        // fire an event for users to handle and re-authenticate
+        this.fire('authenticationrequired', {
+          authenticate: Util.bind(this.authenticate, this)
+        }, true);
+
+        // if the user has access to a callback they can handle the auth error
+        error.authenticate = Util.bind(this.authenticate, this);
+      }
+
+      callback.call(context, error, response);
+    }, this);
+  },
+
+  _runQueue: function() {
+    for (var i = 0; i < this._requestQueue; i++) {
+      var requestParams = this._requestQueue[i];
+      this._request.apply(this, requestParams);
+    }
+    this._requestQueue = [];
   }
 });
 
