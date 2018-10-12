@@ -72,7 +72,7 @@ export var WebMap = L.Evented.extend({
       params.token = this._token;
     }
 
-    L.esri.request(webmapMetaDataRequestUrl, params, function (error, response) {
+    this._request(webmapMetaDataRequestUrl, params, function (error, response) {
       if (error) {
         console.log(error);
       } else {
@@ -96,7 +96,7 @@ export var WebMap = L.Evented.extend({
       params.token = this._token;
     }
 
-    L.esri.request(webmapRequestUrl, params, function (error, response) {
+    this._request(webmapRequestUrl, params, function (error, response) {
       if (error) {
         console.log(error);
       } else {
@@ -107,7 +107,7 @@ export var WebMap = L.Evented.extend({
         response.baseMap.baseMapLayers.map(function (baseMapLayer) {
           if (baseMapLayer.itemId !== undefined) {
             var itemRequestUrl = 'https://' + server + '/sharing/rest/content/items/' + baseMapLayer.itemId;
-            L.esri.request(itemRequestUrl, params, function (err, res) {
+            this._request(itemRequestUrl, params, function (err, res) {
               if (err) {
                 console.error(error);
               } else {
@@ -132,7 +132,7 @@ export var WebMap = L.Evented.extend({
           map.createPane(paneName);
           if (layer.itemId !== undefined) {
             var itemRequestUrl = 'https://' + server + '/sharing/rest/content/items/' + layer.itemId;
-            L.esri.request(itemRequestUrl, params, function (err, res) {
+            this._request(itemRequestUrl, params, function (err, res) {
               if (err) {
                 console.error(error);
               } else {
