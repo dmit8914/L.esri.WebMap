@@ -89,6 +89,15 @@
             position: 'bottomright'
         }).addTo(webmap._map);
     });
+
+    webmap.on(
+        'authenticationrequired',
+        function(e) {
+            console.log("webmap: authenticationrequired");
+            var token = "...";
+            e.authenticate(token);
+        }
+    );
 </script>
 
 </body>
