@@ -57,7 +57,7 @@ export var WebMap = L.Evented.extend({
   },
 
   _operationalLayer: function (layer, layers, map, params, paneName) {
-    var lyr = operationalLayer(layer, layers, map, params);
+    var lyr = operationalLayer(layer, layers, map, params, paneName);
     if (lyr !== undefined && layer.visibility === true) {
       lyr.addTo(map);
     }
