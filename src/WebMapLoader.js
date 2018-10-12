@@ -203,11 +203,11 @@ export var WebMap = L.Evented.extend({
 
         // fire an event for users to handle and re-authenticate
         this.fire('authenticationrequired', {
-          authenticate: Util.bind(this.authenticate, this)
+          authenticate: L.Util.bind(this.authenticate, this)
         }, true);
 
         // if the user has access to a callback they can handle the auth error
-        error.authenticate = Util.bind(this.authenticate, this);
+        error.authenticate = L.Util.bind(this.authenticate, this);
       }
 
       callback.call(context, error, response);
@@ -215,7 +215,7 @@ export var WebMap = L.Evented.extend({
   },
 
   _runQueue: function() {
-    for (var i = 0; i < this._requestQueue; i++) {
+    for (var i = 0; i < this._requestQueue.length; i++) {
       var requestParams = this._requestQueue[i];
       this._request.apply(this, requestParams);
     }
