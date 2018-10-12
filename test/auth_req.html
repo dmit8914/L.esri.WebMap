@@ -18,7 +18,7 @@
 	<script src="https://cdn.jsdelivr.net/leaflet.esri.heatmap-feature-layer/2.0.0-beta.1/esri-leaflet-heatmap-feature-layer.js"></script>
 
   <!-- Load Esri Leaflet Vector Tile from CDN -->
-  <script src="//unpkg.com/esri-leaflet-vector@1.0.2"></script>
+  <script src="//unpkg.com/esri-leaflet-vector@1.0.7"></script>
 
   <!-- Load Esri Leaflet Renderers from CDN -->
   <script src="//cdn.jsdelivr.net/leaflet.esri.renderers/2.0.3/esri-leaflet-renderers.js"></script>
@@ -52,6 +52,7 @@
 <div id="map"></div>
 
 <script>
+    var token = "...";
     var webmapId = '22c504d229f14c789c5b49ebff38b941'; // Default WebMap ID
 
     var urlParams = location.search.substring(1).split('&');
@@ -59,6 +60,9 @@
         var param = urlParams[i].split('=');
         if(param[0] === 'webmap') {
             webmapId = param[1]
+        }
+        else if (param[0] === 'token') {
+            token = param[1];
         }
     }
 
@@ -94,7 +98,6 @@
         'authenticationrequired',
         function(e) {
             console.log("webmap: authenticationrequired");
-            var token = "...";
             e.authenticate(token);
         }
     );
