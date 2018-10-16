@@ -20,10 +20,15 @@ export var LabelMarker = L.Marker.extend({
     var r = /\[([^\]]*)\]/g;
     var labelText = labelingInfo[0].labelExpression;
 
-    labelText = labelText.replace(r, function (s) {
-      var m = r.exec(s);
-      return properties[m[1]];
-    });
+    if (labelText) {
+      labelText = labelText.replace(r, function (s) {
+        var m = r.exec(s);
+        return properties[m[1]];
+      });
+    }
+    else {
+      labelText = "";
+    }
 
     return labelText;
   },
