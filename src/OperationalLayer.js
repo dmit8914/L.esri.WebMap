@@ -8,11 +8,11 @@ import { polylineLabelPos } from './Label/PolylineLabel';
 import { polygonLabelPos } from './Label/PolygonLabel';
 import { createPopupContent } from './Popup/Popup';
 
-export function operationalLayer (layer, layers, map, params, paneName) {
-  return _generateEsriLayer(layer, layers, map, params, paneName);
+export function operationalLayer (webmap, layer, layers, map, params, paneName) {
+  return _generateEsriLayer(webmap, layer, layers, map, params, paneName);
 }
 
-export function _generateEsriLayer (layer, layers, map, params, paneName) {
+export function _generateEsriLayer (webmap, layer, layers, map, params, paneName) {
   console.log('generateEsriLayer: ', layer.title, layer);
   var lyr;
   var labels = [];
@@ -110,6 +110,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
           pane: paneName
         });
 
+        lyr.addEventParent(webmap);
+
         layers.push({ type: 'HL', title: layer.title || '', layer: lyr });
 
         return lyr;
@@ -166,6 +168,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
           }
         });
 
+        lyr.addEventParent(webmap);
+
         lyr = L.layerGroup([lyr, labelsLayer]);
 
         layers.push({ type: 'FL', title: layer.title || '', layer: lyr });
@@ -192,6 +196,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
         }
       });
 
+      lyr.addEventParent(webmap);
+
       layers.push({ type: 'FL', title: layer.title || '', layer: lyr });
 
       return lyr;
@@ -209,6 +215,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
         }
       }
     });
+
+    lyr.addEventParent(webmap);
 
     layers.push({ type: 'FL', title: layer.title || '', layer: lyr });
 
@@ -313,6 +321,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
       opacity: layer.opacity || 1
     });
 
+    lyr.addEventParent(webmap);
+
     layers.push({ type: 'IML', title: layer.title || '', layer: lyr });
 
     return lyr;
@@ -323,6 +333,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
       pane: paneName,
       opacity: layer.opacity || 1
     });
+
+    lyr.addEventParent(webmap);
 
     layers.push({ type: 'DML', title: layer.title || '', layer: lyr });
 
@@ -349,6 +361,8 @@ export function _generateEsriLayer (layer, layers, map, params, paneName) {
       }
     }
 
+    lyr.addEventParent(webmap);
+    
     document.getElementsByClassName('leaflet-tile-pane')[0].style.opacity = layer.opacity || 1;
 
     layers.push({ type: 'TML', title: layer.title || '', layer: lyr });
