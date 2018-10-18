@@ -396,10 +396,14 @@ export function _generateEsriLayer (webmap, layer, layers, map, params, paneName
 
     if (keys[layer.title]) {
       lyr = L.esri.Vector.basemap(keys[layer.title]);
+    } else if (layer.itemId) {
+      lyr = L.esri.Vector.layer(layer.itemId);
     } else {
       console.error('Unsupported Vector Tile Layer: ', layer);
       lyr = L.featureGroup([]);
     }
+
+    lyr.addEventParent(webmap);
 
     layers.push({ type: 'VTL', title: layer.title || layer.id || '', layer: lyr });
 
